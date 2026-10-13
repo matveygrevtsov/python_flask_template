@@ -1,9 +1,10 @@
 # Simple Flask Backend
 
-Простой backend на Flask, запускаемый на порту 3000.
+Простой backend на Flask, запускаемый на порту 3000. Поддерживает запуск через Docker.
 
 ## Установка
 
+### Обычная установка (без Docker)
 1. Убедитесь, что у вас установлен Python 3.7+
 2. Установите зависимости:
 
@@ -11,9 +12,14 @@
 pip install -r requirements.txt
 ```
 
+### Docker установка
+Для установки с использованием Docker убедитесь, что у вас установлены:
+- Docker
+- Docker Compose (рекомендуется)
+
 ## Запуск сервера
 
-### Способ 1: Через скрипт управления (рекомендуется)
+### Способ 1: Через скрипт управления (рекомендуется без Docker)
 ```bash
 # Дайте права на выполнение
 chmod +x manage.sh
@@ -37,12 +43,49 @@ chmod +x manage.sh
 ./manage.sh logs
 ```
 
-### Способ 2: Через gunicorn напрямую
+### Способ 2: Через Docker (рекомендуется для production)
+```bash
+# Дайте права на выполнение Docker скрипта
+chmod +x docker-manage.sh
+
+# Собрать Docker образ
+./docker-manage.sh build
+
+# Запустить с docker-compose (рекомендуется)
+./docker-manage.sh up
+
+# Проверить статус контейнера
+./docker-manage.sh status
+
+# Посмотреть логи
+./docker-manage.sh logs
+
+# Протестировать эндпоинты
+./docker-manage.sh test
+
+# Остановить
+./docker-manage.sh down
+
+# Полная остановка и очистка
+./docker-manage.sh clean
+```
+
+### Быстрый запуск Docker:
+```bash
+# С помощью docker-compose
+docker-compose up -d
+
+# Или напрямую с Docker
+docker build -t flask-backend .
+docker run -d --name flask-backend -p 3000:3000 flask-backend
+```
+
+### Способ 3: Через gunicorn напрямую
 ```bash
 gunicorn --bind 0.0.0.0:3000 --workers 1 wsgi:app
 ```
 
-### Способ 3: Через встроенный Flask сервер (только для разработки)
+### Способ 4: Через встроенный Flask сервер (только для разработки)
 ```bash
 python app.py
 ```
@@ -98,11 +141,26 @@ python app.py
 ├── requirements.txt    # Зависимости Python
 ├── manage.sh           # Скрипт управления сервером
 ├── run.sh              # Простой скрипт запуска
+├── Dockerfile          # Docker конфигурация
+├── docker-compose.yml  # Docker Compose конфигурация
+├── docker-manage.sh    # Docker management скрипт
 └── README.md           # Эта документация
 ```
+
+## Docker Configuration
+
+### Dockerfile
+Использует официальный Python 3.9 slim образ, устанавливает зависимости через pip, копирует код приложения и запускает через gunicorn.
+
+### docker-compose.yml
+Упрощает управление контейнером с поддержкой:
+- Порта 3000
+- Автоматического рестарта
+- Volume монтирования для разработки
 
 ## Заметки
 
 - Сервер использует CORS (Cross-Origin Resource Sharing) для разрешения запросов из браузера
 - Для production использования рекомендуется настроить gunicorn с большим количеством воркеров
-- Порт 3000 используется по умолчанию, но может быть изменен в аргументах gunicorn
+- Порт 3000 используется по умолчанию, но может быть изменен в аргументах gunicorn или Docker конфигурации
+- Docker обеспечивает изолированное окружение и упрощает деплоймент на разных системах
